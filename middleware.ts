@@ -1,8 +1,16 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return createClient(request);
+  // If Supabase env not set (e.g., local without .env or Vercel without env), skip
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
+  try {
+    return await createClient(request);
+  } catch {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
 }
 
 export const config = {

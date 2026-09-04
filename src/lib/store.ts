@@ -59,15 +59,15 @@ export function saveCustomCollege(college: College) {
 
 export function updateCollege(slug: string, updates: Partial<College>) {
   const custom = getCustomColleges();
-  const base = getAllColleges().find(c => c.slug === slug);
-  const existing = custom.find(c => c.slug === slug) || base;
+  const base = getAllColleges().find((c: College) => c.slug === slug);
+  const existing = custom.find((c: College) => c.slug === slug) || base;
   if (!existing) return;
   const updated = { ...existing, ...updates, slug, id: slug } as College;
   saveCustomCollege(updated);
 }
 
 export function deleteCustomCollege(slug: string) {
-  const existing = getCustomColleges().filter(c => c.slug !== slug);
+  const existing = getCustomColleges().filter((c: College) => c.slug !== slug);
   localStorage.setItem(KEY, JSON.stringify(existing));
   Object.keys(localStorage).forEach(k => {
     if (k.startsWith(PDF_KEY_PREFIX + slug)) localStorage.removeItem(k);
@@ -140,13 +140,13 @@ export function restoreBaseColleges() {
 export function getAllCollegesMerged(): College[] {
   const hideBase = isBaseHidden();
   const deleted = getDeletedBase();
-  const base = hideBase ? [] : getAllColleges().filter(c => !deleted.includes(c.slug));
+  const base = hideBase ? [] : getAllColleges().filter((c: College) => !deleted.includes(c.slug));
   const custom = getCustomColleges();
   const map = new Map<string, College>();
-  base.forEach(c => map.set(c.slug, c));
-  custom.forEach(c => map.set(c.slug, c));
-  const result = Array.from(map.values()).filter(c => !deleted.includes(c.slug));
-  return result.sort((a,b)=> a.name.localeCompare(b.name));
+  base.forEach((c: College) => map.set(c.slug, c));
+  custom.forEach((c: College) => map.set(c.slug, c));
+  const result = Array.from(map.values()).filter((c: College) => !deleted.includes(c.slug));
+  return result.sort((a: College,b: College)=> a.name.localeCompare(b.name));
 }
 
 // Live sync: fetch from Supabase and merge (for Vercel/Netlify global)
@@ -161,16 +161,16 @@ export async function syncFromSupabase(): Promise<College[]> {
     // Merge base + supabase (supabase wins)
     const hideBase = isBaseHidden();
     const deleted = getDeletedBase();
-    const base = hideBase ? [] : getAllColleges().filter(c => !deleted.includes(c.slug));
+    const base = hideBase ? [] : getAllColleges().filter((c: College) => !deleted.includes(c.slug));
     const map = new Map<string, College>();
-    base.forEach(c => map.set(c.slug, c));
-    supabaseColleges.forEach(c => map.set(c.slug, c));
+    base.forEach((c: College) => map.set(c.slug, c));
+    supabaseColleges.forEach((c: College) => map.set(c.slug, c));
     // Also include local custom not yet in supabase (offline)
-    getCustomColleges().forEach(c => {
+    getCustomColleges().forEach((c: College) => {
       if (!map.has(c.slug)) map.set(c.slug, c);
     });
-    const result = Array.from(map.values()).filter(c => !deleted.includes(c.slug));
-    return result.sort((a,b)=> a.name.localeCompare(b.name));
+    const result = Array.from(map.values()).filter((c: College) => !deleted.includes(c.slug));
+    return result.sort((a: College,b: College)=> a.name.localeCompare(b.name));
   } catch { return getAllCollegesMerged(); }
 }
 
@@ -190,7 +190,7 @@ export function subscribeToSupabase(callback: (colleges: College[])=>void) {
 }
 
 export function getMergedCollegeBySlug(slug: string): College | undefined {
-  return getAllCollegesMerged().find(c => c.slug === slug);
+  return getAllCollegesMerged().find((c: College) => c.slug === slug);
 }
 
 export function exportCollegesJSON(): string {
@@ -224,7 +224,7 @@ export async function createProjectPatch(): Promise<{json: string, pdfs: {slug: 
   const colleges = getAllCollegesMerged();
   const json = JSON.stringify(colleges, null, 2);
   const pdfs: {slug: string, fileName: string, dataUrl: string}[] = [];
-  colleges.forEach(c => {
+  colleges.forEach((c: College) => {
     const allFiles = [
       ...(c.documents.fees.files as any[]),
       ...(c.documents.documentsRequired.files as any[]),
